@@ -1,0 +1,27 @@
+{
+	"name": "crypto-trading-bot",
+	"version": "1.0.0",
+	"description": "Crypto-Arbitrage-Trading-Bot on Binance. Trading Strategy - Market Making. ",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"Nodejs",
+		"Bitcoin",
+		"Binance",
+		"API",
+		"CCXT",
+		"Arbitrage"
+	],
+	"author": "Enock Kipkoech",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^0.27.2",
+		"ccxt": "^1.84.3",
+		"dotenv": "^16.0.1",
+		"telegraf": "^4.8.2",
+		"dateformat": "^4.6.3"
+	},
+	"type": "module"
+}
