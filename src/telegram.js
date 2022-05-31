@@ -1,9 +1,11 @@
 import { Context as ctx, Telegraf } from 'telegraf';
 import 'dotenv/config';
+import { _config } from '../data/config.js';
+// import { config } from 'dotenv';
 
 const config = {
-	WHITELISTED_USERS: [process.env.WHITELISTED_USERS],
-	BOT_TOKEN: process.env.BOT_TOKEN,
+	WHITELISTED_USERS: _config.WHITELISTED_USERS,
+	BOT_TOKEN: _config.BOT_TOKEN,
 };
 const bot = new Telegraf(config.BOT_TOKEN);
 
@@ -26,7 +28,7 @@ bot.use(async (ctx, next) => {
 	try {
 		let userId = ctx.message.from.id || '';
 
-		if (process.env.WHITELISTED_USERS.includes(userId.toString())) {
+		if (config.WHITELISTED_USERS.includes(userId.toString())) {
 			await next();
 			return;
 		} else {

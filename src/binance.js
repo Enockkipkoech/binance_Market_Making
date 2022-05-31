@@ -4,8 +4,12 @@ import axios from 'axios';
 import dateFormat from 'dateformat';
 
 import { sendMessage } from '../src/telegram.js';
+import { _config } from '../data/config.js';
 
-const baseURL = 'https://api1.binance.com//api/v3/allOrders';
+// const baseURL = 'https://api1.binance.com//api/v3/allOrders';
+
+// https://api1.binance.com//api/v3/order
+
 const binanceClient = new ccxt.binance({
 	apiKey: process.env.API_KEY,
 	secret: process.env.API_SECRET_KEY,
@@ -26,11 +30,11 @@ export const run = () => {
 	console.info(`- - -`.repeat(10));
 
 	const config = {
-		asset: 'BTC',
-		base: 'USDT',
-		allocation: 0.1,
-		spread: 0.001,
-		tickInterval: 10000,
+		asset: _config.ASSET,
+		base: _config.BASE,
+		allocation: _config.ALLOCATION,
+		spread: _config.SPREAD,
+		tickInterval: _config.TICK_INTERVAL,
 	};
 
 	let orders = []; //{ order: 1 }, { oredr: 2 }
@@ -44,17 +48,17 @@ export const run = () => {
 
 		orders = await binanceClient.fetchOpenOrders(market);
 
-		// orders.forEach(async (order) => {
-		// 	const binance = await binanceClient.cancelOrder(order.id);
-		// 	console.log(`Orders Cancelled: `, binance);
-		// });
+		orders.forEach(async (order) => {
+			const binance = await binanceClient.cancelOrder(order.id);
+			console.log(`Orders Cancelled: `, binance);
+		});
 
 		const results = await Promise.all([
 			axios.get(
-				'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',
+				`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd`,
 			),
 			axios.get(
-				'https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd',
+				`https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd`,
 			),
 		]);
 
@@ -121,7 +125,7 @@ export const run = () => {
 		console.log(message);
 		sendMessage(message);
 
-		mesaage = `New tick for ${market}...
+		message = `New tick for ${market}...
 		Created limit sell order for ${sellVolume}  @ ${sellPrice}
 		Create limit buy order for ${buyVolume} @ ${buyPrice}
 		`;
@@ -139,7 +143,6 @@ export const run = () => {
 		tick(config, binanceClient);
 		setInterval(tick, config.tickInterval, config, binanceClient);
 	}
-	tick();
 };
 
 export default run;
