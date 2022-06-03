@@ -2,13 +2,10 @@ import 'dotenv/config';
 import ccxt from 'ccxt';
 import axios from 'axios';
 import dateFormat from 'dateformat';
+import gSheet from './gsheet.js';
 
 import { sendMessage } from '../src/telegram.js';
 import { _config } from '../data/config.js';
-
-// const baseURL = 'https://api1.binance.com//api/v3/allOrders';
-
-// https://api1.binance.com//api/v3/order
 
 const binanceClient = new ccxt.binance({
 	apiKey: process.env.API_KEY,
@@ -21,7 +18,10 @@ if (!process.env.API_KEY && !process.env.API_SECRET_KEY) {
 	throw new Error(message);
 }
 
-export const run = () => {
+export const run = async () => {
+	// Set-up google sheets
+	await gSheet.connect();
+
 	let message = '';
 	console.info(`- - -`.repeat(10));
 	message = `Starting bot at ${dateFormat(new Date())}`;
@@ -86,7 +86,22 @@ export const run = () => {
 		sendMessage(message);
 
 		const sellVolume = assetBalance * allocation;
-		const buyVolume = (baseBalance * allocation) / marketPrice;
+
+		// FIXME set buyVolume to 0 for testing purposes
+		const buyVolume = ((baseBalance * allocation) / marketPrice) * 0;
+
+		const gSheetdata = {
+			Date: Date(),
+			Time: new Date(),
+			Pair: market,
+			MarketPrice: marketPrice,
+			BuyPrice: buyPrice,
+			SellPrice: sellPrice,
+			ExpectedProfit: sellPrice - buyPrice,
+			// balances: { baseBalance, assetBalance },
+		};
+		console.log(gSheetdata.ExpectedProfit);
+		gSheet.addRows('Spreads', [gSheetdata]);
 
 		if (buyVolume == 0 && sellVolume == 0) {
 			(message = `No Trading Volumes: BUY VOLUME is: ${buyVolume} and SELL VOLUME: ${sellVolume}. `),
