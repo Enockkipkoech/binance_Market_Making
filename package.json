@@ -4,6 +4,7 @@
 	"description": "Crypto-Arbitrage-Trading-Bot on Binance. Trading Strategy - Market Making. ",
 	"main": "index.js",
 	"scripts": {
+		"start": "node index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [
@@ -19,6 +20,7 @@
 	"dependencies": {
 		"axios": "^0.27.2",
 		"ccxt": "^1.84.3",
+		"chalk": "^5.0.1",
 		"dateformat": "^4.6.3",
 		"dotenv": "^16.0.1",
 		"google-spreadsheet": "^3.3.0",

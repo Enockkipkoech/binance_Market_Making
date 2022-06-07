@@ -26,6 +26,7 @@ class GSheet {
 		await this.doc.loadInfo();
 
 		const spreadsheet = this.doc.sheetsByTitle['Spreads'];
+		const spreadsheetOrders = this.doc.sheetsByTitle['Orders'];
 
 		spreadsheet.setHeaderRow([
 			'Date',
@@ -36,6 +37,17 @@ class GSheet {
 			'SellPrice',
 			'ExpectedProfit',
 			'balances',
+			'BaseBalance',
+			'AssetBalance',
+		]);
+
+		spreadsheetOrders.setHeaderRow([
+			'Pair',
+			'OrderId',
+			'OrderAmount',
+			'OrderDate',
+			'OrderTime',
+			'Others',
 		]);
 	};
 

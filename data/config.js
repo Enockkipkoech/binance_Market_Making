@@ -3,7 +3,7 @@ import 'dotenv/config';
 export const _config = {
 	ASSET: 'BTC',
 	BASE: 'USDT',
-	ALLOCATION: 1,
+	ALLOCATION: 0.2,
 	SPREAD: 0.0001,
 	TICK_INTERVAL: 20000,
 
