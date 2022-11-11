@@ -1,12 +1,12 @@
-import 'dotenv/config';
-import ccxt from 'ccxt';
-import axios from 'axios';
-import dateFormat from 'dateformat';
-import gSheet from './gsheet.js';
-import chalk from 'chalk';
+import "dotenv/config";
+import ccxt from "ccxt";
+import axios from "axios";
+import dateFormat from "dateformat";
+import gSheet from "./gsheet.js";
+import chalk from "chalk";
 
-import { sendMessage } from '../src/telegram.js';
-import { _config } from '../data/config.js';
+import { sendMessage } from "../src/telegram.js";
+import { _config } from "../data/config.js";
 
 const binanceClient = new ccxt.binance({
 	apiKey: process.env.API_KEY,
@@ -24,11 +24,11 @@ export const run = async () => {
 	// Set-up google sheets
 	await gSheet.connect();
 
-	let message = '';
+	let message = "";
 	console.info(`- - -`.repeat(10));
 	message = `Starting bot at ${dateFormat(
 		new Date(),
-		'dddd,mmmm d,yyyy, h:MM:ss TT',
+		"dddd,mmmm d,yyyy, h:MM:ss TT",
 	)}`;
 	console.log(chalk.bgGreenBright(message));
 	sendMessage(message);
@@ -40,6 +40,7 @@ export const run = async () => {
 		allocation: _config.ALLOCATION,
 		spread: _config.SPREAD,
 		tickInterval: _config.TICK_INTERVAL,
+		timeout: _config.TIMEOUT_BEFORE_SELL,
 	};
 	// let orders = ['open' | 'canceled' | 'NEW' | 'filled']; //{ order: 1 }, { oredr: 2 }
 
@@ -71,6 +72,8 @@ export const run = async () => {
 		// 	});
 		// }
 
+		// TODO Get prices of all tokens
+
 		const results = await Promise.all([
 			axios.get(
 				`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd`,
@@ -79,6 +82,7 @@ export const run = async () => {
 				`https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd`,
 			),
 		]);
+		console.log(`Coingecko Price Results:${results}`);
 
 		let marketPrice = results[0].data.bitcoin.usd / results[1].data.tether.usd;
 
@@ -108,8 +112,8 @@ export const run = async () => {
 		const sellVolume = buyVolume + assetBalance;
 
 		const gSheetSpreads = {
-			Date: dateFormat(Date(), ' dddd, mmmm d, yyyy'),
-			Time: dateFormat(new Date(), 'h:MM:ss TT'),
+			Date: dateFormat(Date(), " dddd, mmmm d, yyyy"),
+			Time: dateFormat(new Date(), "h:MM:ss TT"),
 			Pair: market,
 			MarketPrice: marketPrice,
 			BuyPrice: buyPrice,
@@ -118,21 +122,21 @@ export const run = async () => {
 			BaseBalance: baseBalance,
 			AssetBalance: assetBalance,
 		};
-		gSheet.addRows('Spreads', [gSheetSpreads]);
+		gSheet.addRows("Spreads", [gSheetSpreads]);
 
 		//TODO Fix values for orders
 		const gSheetOrders = {
 			Pair: market,
-			OrderId: '',
-			OrderAmount: '',
-			OrderDate: dateFormat(Date(), ' dddd, mmmm d, yyyy '),
-			OrderTime: dateFormat(new Date(), 'h:MM:ss TT'),
-			Others: '',
+			OrderId: "",
+			OrderAmount: "",
+			OrderDate: dateFormat(Date(), " dddd, mmmm d, yyyy "),
+			OrderTime: dateFormat(new Date(), "h:MM:ss TT"),
+			Others: "",
 		};
 
-		gSheet.addRows('Orders', [gSheetOrders]);
+		gSheet.addRows("Orders", [gSheetOrders]);
 
-		if (buyVolume === 0 && sellVolume === 0 && orderStatus === 'open') {
+		if (buyVolume === 0 && sellVolume === 0 && orderStatus === "open") {
 			(message = `No Trading: ORDER STATUS is: ${orderStatus} BUY VOLUME is: ${buyVolume} and SELL VOLUME: ${sellVolume}. `),
 				console.log(message);
 			// sendMessage(message);
@@ -141,7 +145,7 @@ export const run = async () => {
 			return;
 		}
 
-		if (!buyVolume > 0.00035 && !orderStatus === 'open') {
+		if (!buyVolume > 0.00035 && !orderStatus === "open") {
 			let buyOrder = await binanceClient.createLimitBuyOrder(
 				market,
 				buyVolume,
@@ -157,8 +161,16 @@ export const run = async () => {
 		console.log(chalk.yellowBright.bold(message));
 		sendMessage(message);
 
-		if (sellVolume != 0 && !orderStatus === 'open') {
-			let side = ['sell', 'buy'];
+		setTimeout(() => {
+			console.log(
+				chalk.bold.yellowBright(
+					`Waiting for 1 Minute before placing sell order!`,
+				),
+			);
+		}, config.timeout);
+
+		if (sellVolume != 0 && !orderStatus === "open") {
+			let side = ["sell", "buy"];
 			const sellOrder = await binanceClient.createLimitSellOrder(
 				market,
 				// side[0],
